@@ -17,6 +17,21 @@ def ConnectorMysql():
   except Exception as error:
     print(f'Error connecting to database: {error}')
     return
+  
+def validate_user_input(data):
+  if not data:
+    return 'No input data provided', False, 400
+  if 'name' not in data or not data['name']:
+    return 'Name is required', False, 400
+  if 'age' not in data:
+    return 'Age is required', False, 400
+  try:
+    age = int(data['age'])
+    if age <= 0:
+      return 'Age must be a positive integer', False, 400
+  except ValueError:
+      return 'Age must be an integer', False, 400
+  return None, True, 200
 
 def get_all(table):
   database = ConnectorMysql()
