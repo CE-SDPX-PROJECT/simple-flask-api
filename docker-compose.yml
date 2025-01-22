@@ -11,7 +11,7 @@ services:
       - db-dev
 
   db-dev:
-    image: mysql:8.0.40-debian
+    image: mysql:8.0
     container_name: mysql_db_dev
     restart: unless-stopped
     ports:
@@ -22,13 +22,43 @@ services:
       - MYSQL_PASSWORD=db4dev$
       - MYSQL_DATABASE=flask_db_dev
     volumes:
-      - flask-db-data:/var/lib/mysql
+      - dev-db-data:/var/lib/mysql
       - ./scripts:/docker-entrypoint-initdb.d:ro
     networks:
       - dev-network
-volumes:
-  flask-db-data:
 
+  api-test:
+    build: .
+    container_name: flask_api_dev
+    restart: on-failure
+    ports:
+      - "5001:5000"
+    networks:
+      - dev-network
+    depends_on:
+      - db-test
+
+  db-test:
+    image: mysql:8.0
+    container_name: mysql_db_dev
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=str0ng_p@ssw0rd
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=db4dev$
+      - MYSQL_DATABASE=flask_db_dev
+    volumes:
+      - test-db-data:/var/lib/mysql
+      - ./scripts:/docker-entrypoint-initdb.d:ro
+    networks:
+      - test-network
+
+volumes:
+  dev-db-data:
+  test-db-data:
 
 networks:
   dev-network:
+  test-network:
