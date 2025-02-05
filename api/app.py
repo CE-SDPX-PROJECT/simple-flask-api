@@ -51,7 +51,7 @@ def add_user():
         return jsonify({'message': f'Error adding user: {error}'}), status_code
     return jsonify(response_data), status_code
 
-@app.route('/user/<int:uid>', methods=['PATCH'])
+@app.route('/user/<int:uid>', methods=['PUT'])
 def update_user(uid):
     data = request.get_json()
     
