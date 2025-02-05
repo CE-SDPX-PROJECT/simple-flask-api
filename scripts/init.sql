@@ -1,0 +1,8 @@
+-- CREATE DATABASE IF NOT EXISTS flask_db_dev;
+-- USE flask_db_dev;
+
+CREATE TABLE IF NOT EXISTS USERS (
+    uid INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    age INT NOT NULL
+);
