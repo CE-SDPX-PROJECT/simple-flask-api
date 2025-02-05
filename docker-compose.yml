@@ -1,34 +1,81 @@
-services:
-  api-dev:
-    build: .
-    container_name: flask_api_dev
-    restart: on-failure
-    ports:
-      - "5001:5000"
-    networks:
-      - dev-network
-    depends_on:
-      - db-dev
+  services:
+    api-dev:
+      build:
+        context: .
+        dockerfile: Dockerfile.dev
+      container_name: flask_api_dev
+      restart: on-failure
+      environment:
+        - ENV_FILE=.env.dev
+      ports:
+        - "8081:5000"
+      networks:
+        - dev-network
+      depends_on:
+        - db-dev
+      env_file:
+        - ./.env.dev
 
-  db-dev:
-    image: mysql:8.0.40-debian
-    container_name: mysql_db_dev
-    restart: unless-stopped
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=str0ng_p@ssw0rd
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=db4dev$
-      - MYSQL_DATABASE=flask_db_dev
-    volumes:
-      - flask-db-data:/var/lib/mysql
-      - ./scripts:/docker-entrypoint-initdb.d:ro
-    networks:
-      - dev-network
-volumes:
-  flask-db-data:
+    db-dev:
+      image: mysql:8.0.40-debian
+      container_name: mysql_db_dev
+      restart: unless-stopped
+      ports:
+        - "3306:3306"
+      environment:
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      volumes:
+        - db-data-dev:/var/lib/mysql
+        - ./scripts:/docker-entrypoint-initdb.d
+      networks:
+        - dev-network
+      env_file:
+        - ./.env.dev
+
+    api-test:
+      build:
+        context: .
+        dockerfile: Dockerfile.test
+      container_name: flask_api_test
+      restart: on-failure
+      environment:
+        - ENV_FILE=.env.test
+      ports:
+        - "8082:5001"
+      networks:
+        - test-network
+      depends_on:
+        - db-test
+      env_file:
+        - ./.env.test
+
+    db-test:
+      image: mysql:8.0.40-debian
+      container_name: mysql_db_test
+      restart: unless-stopped
+      ports:
+        - "3307:3306"
+      environment:
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      volumes:
+        - db-data-test:/var/lib/mysql
+        - ./scripts:/docker-entrypoint-initdb.d
+      networks:
+        - test-network
+      env_file:
+        - ./.env.test
 
 
-networks:
-  dev-network:
+  volumes:
+    db-data-dev:
+    db-data-test:
+
+  networks:
+    dev-network:
+    test-network:

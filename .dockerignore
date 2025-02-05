@@ -1,7 +1,6 @@
 .git
 
-__pycache__/
-*.pyc
+**/*.pyc
 
 venv/
 
