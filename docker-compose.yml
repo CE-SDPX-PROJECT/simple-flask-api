@@ -1,81 +1,112 @@
-  services:
-    api-dev:
-      build:
-        context: .
-        dockerfile: Dockerfile.dev
-      container_name: flask_api_dev
-      restart: on-failure
-      environment:
-        - ENV_FILE=.env.dev
-      ports:
-        - "8081:5000"
-      networks:
-        - dev-network
-      depends_on:
-        - db-dev
-      env_file:
-        - ./.env.dev
+services:
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: flask_api_dev
+    restart: on-failure
+    environment:
+      - ENV_FILE=.env.dev
+    ports:
+      - "8081:5000"
+    networks:
+      - dev-network
+    depends_on:
+      - db-dev
+    env_file:
+      - ./.env.dev
 
-    db-dev:
-      image: mysql:8.0.40-debian
-      container_name: mysql_db_dev
-      restart: unless-stopped
-      ports:
-        - "3306:3306"
-      environment:
-        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-        - MYSQL_DATABASE=${MYSQL_DATABASE}
-        - MYSQL_USER=${MYSQL_USER}
-        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      volumes:
-        - db-data-dev:/var/lib/mysql
-        - ./scripts:/docker-entrypoint-initdb.d
-      networks:
-        - dev-network
-      env_file:
-        - ./.env.dev
+  db-dev:
+    image: mysql:8.0.40-debian
+    container_name: mysql_db_dev
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db-data-dev:/var/lib/mysql
+      - ./scripts:/docker-entrypoint-initdb.d
+    networks:
+      - dev-network
+    env_file:
+      - ./.env.dev
 
-    api-test:
-      build:
-        context: .
-        dockerfile: Dockerfile.test
-      container_name: flask_api_test
-      restart: on-failure
-      environment:
-        - ENV_FILE=.env.test
-      ports:
-        - "8082:5001"
-      networks:
-        - test-network
-      depends_on:
-        - db-test
-      env_file:
-        - ./.env.test
+  phpmyadmin-dev:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_dev
+    restart: unless-stopped
+    environment:
+      - PMA_HOST=db-dev
+      - PMA_PORT=3306
+      - PMA_USER=${MYSQL_USER}
+      - PMA_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "8083:80"
+    networks:
+      - dev-network
+    depends_on:
+      - db-dev
 
-    db-test:
-      image: mysql:8.0.40-debian
-      container_name: mysql_db_test
-      restart: unless-stopped
-      ports:
-        - "3307:3306"
-      environment:
-        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-        - MYSQL_DATABASE=${MYSQL_DATABASE}
-        - MYSQL_USER=${MYSQL_USER}
-        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      volumes:
-        - db-data-test:/var/lib/mysql
-        - ./scripts:/docker-entrypoint-initdb.d
-      networks:
-        - test-network
-      env_file:
-        - ./.env.test
+  api-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: flask_api_test
+    restart: on-failure
+    environment:
+      - ENV_FILE=.env.test
+    ports:
+      - "8082:5001"
+    networks:
+      - test-network
+    depends_on:
+      - db-test
+    env_file:
+      - ./.env.test
 
+  db-test:
+    image: mysql:8.0.40-debian
+    container_name: mysql_db_test
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db-data-test:/var/lib/mysql
+      - ./scripts:/docker-entrypoint-initdb.d
+    networks:
+      - test-network
+    env_file:
+      - ./.env.test
 
-  volumes:
-    db-data-dev:
-    db-data-test:
+  phpmyadmin-test:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_test
+    restart: unless-stopped
+    environment:
+      - PMA_HOST=db-test
+      - PMA_PORT=3306
+      - PMA_USER=${MYSQL_USER}
+      - PMA_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "8084:80"
+    networks:
+      - test-network
+    depends_on:
+      - db-test
 
-  networks:
-    dev-network:
-    test-network:
+volumes:
+  db-data-dev:
+  db-data-test:
+
+networks:
+  dev-network:
+  test-network:
