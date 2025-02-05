@@ -1,7 +1,7 @@
 ## Dev
 
-``` docker compose --env-file .env.dev up db-dev api-dev phpmyadmin-test --build```
+``` docker compose -f docker-compose.dev.yml --env-file .env.dev up --build```
 
 ## Test
 
-``` docker compose --env-file .env.test up db-test api-test phpmyadmin-dev --build```
+``` docker compose -f docker-compose.test.yml --env-file .env.test up --build```
